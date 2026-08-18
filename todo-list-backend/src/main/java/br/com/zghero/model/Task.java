@@ -62,8 +62,13 @@ public class Task {
         return status;
     }
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     public String toString() {
         return String.format("[ID: %S] Prio: %d | Cat: %s | Status: %s | %s - %s",
                 id, prioridade, categoria, status);
     }
+
 }
