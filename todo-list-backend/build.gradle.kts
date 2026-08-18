@@ -24,3 +24,7 @@ application {
     mainClass = "br.com.zghero.ui.Main"
 }
 
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
+
