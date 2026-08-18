@@ -67,8 +67,8 @@ public class Task {
     }
 
     public String toString() {
-        return String.format("[ID: %S] Prio: %d | Cat: %s | Status: %s | %s - %s",
-                id, prioridade, categoria, status);
+        return "[ID: " + id + "] Prio: " + prioridade + " | Cat: " + categoria +
+                " | Data: " + dataTermino + " | Status: " + status + " | " + nome + " - " + descricao;
     }
 
 }
