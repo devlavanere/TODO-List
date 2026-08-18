@@ -23,3 +23,4 @@ tasks.test {
 application {
     mainClass = "br.com.zghero.ui.Main"
 }
+
