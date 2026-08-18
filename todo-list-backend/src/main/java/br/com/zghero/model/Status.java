@@ -1,5 +1,7 @@
 package br.com.zghero.model;
 
-public class Status {
-
+public enum Status {
+    TODO,
+    DOING,
+    DONE
 }
