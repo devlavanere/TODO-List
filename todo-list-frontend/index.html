@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZG Hero - TODO List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>TODO List MVP</h1>
+        <div class="dashboard">
+            <span class="badge todo">TODO: <span id="count-todo"></span> </span>
+            <span class="badge doing">DOING: <span id="count-doing"></span> </span>
+            <span class="badge done">DONE: <span id="count-done"></span> </span>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Frormulário (Create / Update) -->
+        <section class="form-section">
+            <h2 id="form-title">Nova Tarefa</h2>
+            <form action="" class="" id="task-form">
+                <input type="hidden" id="task-id">
+
+                <div class="form-group">
+                    <label>Nome:</label>
+                    <input type="text" id="nome" required>
+                </div>
+                <div class="form-group">
+                    <label>Descrição:</label>
+                    <input type="text" id="descricao" required>
+                </div>
+                <div class="form-group-row">
+                     <div class="form-group">
+                        <label>Data Término:</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prioridade:</label>
+                        <input type="number" id="prioridade" min="1" max="5" required>
+                    </div>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>Categoria:</label>
+                        <input type="text" id="categoria" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="status">
+                            <option value="TODO">TODO</option>
+                            <option value="DOING">DOING</option>
+                            <option value="DONE">DONE</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" id="btn-submit">Salvar Tarefa</button>
+                <button type="button" id="btn-cancel" style="display: none;">Cancelar Edição</button>
+            </form>
+        </section>
+
+        <!-- Filtros e Listagem (Read / Delete) -->
+        <section class="list-section">
+            <h2>Minhas Tarefas</h2>
+            <div class="filters">
+                <button class="btn-filter active" data-filter="ALL">Todas</button>
+                <button class="btn-filter" data-filter="TODO">TODO</button>
+                <button class="btn-filter" data-filter="DOING">DOING</button>
+                <button class="btn-filter" data-filter="DOING">DONE</button>
+            </div>
+
+            <div id="task-list" class="task-list">
+                <!-- Espaço para injetar as tarefas com JS -->
+            </div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
