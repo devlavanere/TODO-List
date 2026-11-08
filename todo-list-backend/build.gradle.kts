@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("application")
+    id("groovy")
 }
 
 group = "br.com.zghero"
@@ -14,6 +15,8 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.spockframework:spock-core:2.3-groovy-4.0")
+    testImplementation("org.apache.groovy:groovy:4.0.24")
 }
 
 tasks.test {
