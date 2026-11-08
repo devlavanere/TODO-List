@@ -1,19 +1,21 @@
 package br.com.zghero.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Task {
     private String id;
     private String nome;
     private String descricao;
-    private LocalDate dataTermino;
+    private LocalDateTime dataTermino;
     private int prioridade;
     private String categoria;
     private Status status;
+    private List<Alarme> alarmes;
 
-    // Construtor para nova tarefa
-    public Task(String nome, String descricao, LocalDate dataTermino, int prioridade, String categoria, Status status) {
+    public Task(String nome, String descricao, LocalDateTime dataTermino, int prioridade, String categoria, Status status) {
         this.id = UUID.randomUUID().toString().substring(0,6);
         this.nome = nome;
         this.descricao = descricao;
@@ -21,10 +23,11 @@ public class Task {
         this.prioridade = prioridade;
         this.categoria = categoria;
         this.status = status;
+        this.alarmes = new ArrayList<>();
     }
 
     // Construtor para carregar do arquivo
-    public Task(String id, String nome, String descricao, LocalDate dataTermino, int prioridade, String categoria, Status status) {
+    public Task(String id, String nome, String descricao, LocalDateTime dataTermino, int prioridade, String categoria, Status status) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -32,43 +35,69 @@ public class Task {
         this.prioridade = prioridade;
         this.categoria = categoria;
         this.status = status;
+        this.alarmes = new ArrayList<>();
     }
 
     public String getId() {
+
         return id;
     }
 
     public String getNome() {
+
         return nome;
     }
 
     public String getDescricao() {
+
         return descricao;
     }
 
-    public LocalDate getDataTermino() {
+    public LocalDateTime getDataTermino() {
+
         return dataTermino;
     }
 
     public int getPrioridade() {
+
         return prioridade;
     }
 
     public String getCategoria() {
+
         return categoria;
     }
 
     public Status getStatus() {
+
         return status;
     }
 
     public void setStatus(Status status) {
+
         this.status = status;
     }
 
+    public List<Alarme> getAlarmes() {
+        return alarmes;
+    }
+
+    public void adicionarAlarme(int minutosAntecedencia) {
+        // Calcula o momento do disparo subtraindo os minutos da data de término
+        LocalDateTime momentoDisparo = this.dataTermino.minusMinutes(minutosAntecedencia);
+        this.alarmes.add(new Alarme(minutosAntecedencia, momentoDisparo));
+    }
+
+    // Método auxiliar para setar a lista de alarmes (usado ao ler do CSV na Tarefa 3)
+    public void setAlarmes(List<Alarme> alarmes) {
+        this.alarmes = alarmes;
+    }
+
+    // Atualiza para ver tem alarme
     public String toString() {
+        String infoAlarme = alarmes.isEmpty() ? "" : " [Alarmes: " + alarmes.size() + "]";
         return "[ID: " + id + "] Prio: " + prioridade + " | Cat: " + categoria +
-                " | Data: " + dataTermino + " | Status: " + status + " | " + nome + " - " + descricao;
+                " | Data: " + dataTermino.toLocalDate() + infoAlarme + " | Status: " + status + " | " + nome + " - " + descricao;
     }
 
 }

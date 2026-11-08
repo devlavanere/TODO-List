@@ -5,6 +5,7 @@ import br.com.zghero.model.Task;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -97,7 +98,7 @@ public class TaskService {
     public List<Task> filterByDate(LocalDate dataTermino) {
         List<Task> listaFiltrada = new ArrayList<>();
         for(Task t : tasks) {
-            if(t.getDataTermino() == dataTermino) {
+            if(t.getDataTermino().toLocalDate().equals(dataTermino)) {
                 listaFiltrada.add(t);
             }
         }
@@ -123,12 +124,58 @@ public class TaskService {
         System.out.println("=== ESTATÍSTICAS: TODO (" + contTodo + ") | DOING (" + contDoing + ") | DONE (" + contDone + ") ===");
     }
 
+    // --- NOVO MÉTODO PARA CHECAR ALARMES ---
+    public void checkAndPrintAlarms() {
+        LocalDateTime agora = LocalDateTime.now();
+        boolean precisaSalvar = false;
+
+        for (Task t : tasks) {
+            // Se a tarefa já está DONE, ignora os alarmes dela
+            if (t.getStatus() == Status.DONE) {
+                continue;
+            }
+
+            // Verifica cada alarme da tarefa
+            for (br.com.zghero.model.Alarme a : t.getAlarmes()) {
+                // Se a data/hora atual for maior ou igual ao momento do disparo E ele ainda NÃO foi notificado
+                if (!a.isNotificado() && (agora.isAfter(a.getMomentoDisparo()) || agora.isEqual(a.getMomentoDisparo()))) {
+                    System.out.println("************************************************************");
+                    System.out.println("  [ALARME] ATENÇÃO: A tarefa '" + t.getNome() + "' está próxima!");
+                    System.out.println("  Horário Limite: " + t.getDataTermino().toLocalTime());
+                    System.out.println("  Lembrete configurado para " + a.getMinutosAntecedencia() + " minutos de antecedência.");
+                    System.out.println("************************************************************\n");
+
+                    // Marca como notificado para não apitar novamente
+                    a.setNotificado(true);
+                    precisaSalvar = true;
+                }
+            }
+        }
+
+        if (precisaSalvar) {
+            saveToFile();
+        }
+    }
+
     // Salvar no arquivo
     public void saveToFile() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))) {
             for (Task t : tasks) {
+                StringBuilder alarmesCsv = new StringBuilder();
+                if (t.getAlarmes() != null && !t.getAlarmes().isEmpty()) {
+                    for (int i = 0; i < t.getAlarmes().size(); i++) {
+                        alarmesCsv.append(t.getAlarmes().get(i).toCsvFormat());
+                        if (i < t.getAlarmes().size() - 1) {
+                            alarmesCsv.append("|");
+                        }
+                    }
+                } else {
+                    alarmesCsv.append("VAZIO");
+                }
+
                 writer.println(t.getId() + ";" + t.getNome() + ";" + t.getDescricao() + ";" +
-                        t.getDataTermino() + ";" + t.getPrioridade() + ";" + t.getCategoria() + ";" + t.getStatus());
+                        t.getDataTermino().toString() + ";" + t.getPrioridade() + ";" +
+                        t.getCategoria() + ";" + t.getStatus() + ";" + alarmesCsv.toString());
             }
         } catch (IOException e) {
             System.out.println("Erro ao salvar dados.");
@@ -143,12 +190,38 @@ public class TaskService {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] d = line.split(";");
-                if (d.length == 7) {
-                    tasks.add(new Task(d[0], d[1], d[2], LocalDate.parse(d[3]), Integer.parseInt(d[4]), d[5], Status.valueOf(d[6])));
+                // Agora esperamos que o tamanho possa ser 7 (antigo) ou 8 (novo com alarmes)
+                if (d.length >= 7) {
+                    LocalDateTime dt;
+                    try {
+                        dt = LocalDateTime.parse(d[3]);
+                    } catch (Exception ex) {
+                        dt = LocalDate.parse(d[3]).atStartOfDay(); // Fallback
+                    }
+
+                    Task task = new Task(d[0], d[1], d[2], dt, Integer.parseInt(d[4]), d[5], Status.valueOf(d[6]));
+
+                    // Se a linha tem 8 campos, processa os alarmes
+                    if (d.length == 8 && !d[7].equals("VAZIO")) {
+                        String[] alarmesData = d[7].split("\\|");
+                        for (String alarmeStr : alarmesData) {
+                            String[] alarmeCampos = alarmeStr.split(",");
+                            if (alarmeCampos.length == 3) {
+                                int minAntecedencia = Integer.parseInt(alarmeCampos[0]);
+                                LocalDateTime disparo = LocalDateTime.parse(alarmeCampos[1]);
+                                boolean notificado = Boolean.parseBoolean(alarmeCampos[2]);
+
+                                br.com.zghero.model.Alarme novoAlarme = new br.com.zghero.model.Alarme(minAntecedencia, disparo, notificado);
+                                task.getAlarmes().add(novoAlarme);
+                            }
+                        }
+                    }
+
+                    tasks.add(task);
                 }
             }
         } catch (Exception e) {
-            System.out.println("Erro ao carregar dados salvos.");
+            System.out.println("Erro ao carregar dados salvos: " + e.getMessage());
         }
     }
 }
