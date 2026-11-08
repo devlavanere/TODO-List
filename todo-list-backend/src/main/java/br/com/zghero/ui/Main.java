@@ -46,14 +46,33 @@ public class Main {
                     String nome = scanner.nextLine();
                     System.out.print("Descrição: ");
                     String desc = scanner.nextLine();
-                    System.out.print("Data de Término (Formato YYYY-MM-DDTHH:mm, ex: 2026-11-08T15:30): ");
+                    System.out.print("Data e Hora de Término (Formato YYYY-MM-DDTHH:mm, ex: 2026-11-08T15:30): ");
                     LocalDateTime data = LocalDateTime.parse(scanner.nextLine());
                     System.out.print("Prioridade (1 a 5): ");
                     int prio = Integer.parseInt(scanner.nextLine());
                     System.out.print("Categoria: ");
                     String cat = scanner.nextLine();
 
-                    service.addTask(new Task(nome, desc, data, prio, cat, Status.TODO));
+                    Task novaTarefa = new Task(nome, desc, data, prio, cat, Status.TODO);
+
+                    System.out.print("Deseja configurar um alarme para esta tarefa? (S/N): ");
+                    String querAlarme = scanner.nextLine().trim().toUpperCase();
+
+                    while (querAlarme.equals("S") || querAlarme.equals("SIM")) {
+                        System.out.print("Quantos minutos de antecedência o alarme deve tocar? (Ex: 120 para 2 horas): ");
+                        try {
+                            int minutos = Integer.parseInt(scanner.nextLine());
+                            novaTarefa.adicionarAlarme(minutos);
+                            System.out.println("Alarme configurado para: " + data.minusMinutes(minutos));
+                        } catch (NumberFormatException e) {
+                            System.out.println("Valor inválido para minutos.");
+                        }
+
+                        System.out.print("Deseja adicionar OUTRO alarme para esta mesma tarefa? (S/N): ");
+                        querAlarme = scanner.nextLine().trim().toUpperCase();
+                    }
+
+                    service.addTask(novaTarefa);
                     System.out.println("Tarefa adicionada! Lista reordenada pela prioridade.");
                     break;
                 case 2:
