@@ -10,6 +10,7 @@ import br.com.zghero.model.Task;
 import br.com.zghero.service.TaskService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
 
@@ -45,8 +46,8 @@ public class Main {
                     String nome = scanner.nextLine();
                     System.out.print("Descrição: ");
                     String desc = scanner.nextLine();
-                    System.out.print("Data de Término (Formato YYYY-MM-DD): ");
-                    LocalDate data = LocalDate.parse(scanner.nextLine());
+                    System.out.print("Data de Término (Formato YYYY-MM-DDTHH:mm, ex: 2026-11-08T15:30): ");
+                    LocalDateTime data = LocalDateTime.parse(scanner.nextLine());
                     System.out.print("Prioridade (1 a 5): ");
                     int prio = Integer.parseInt(scanner.nextLine());
                     System.out.print("Categoria: ");
@@ -72,7 +73,8 @@ public class Main {
                         printList(service.filterByStatus(Status.valueOf(scanner.nextLine().toUpperCase())));
                     } else if (opFiltro.equals("4")) {
                         System.out.print("Data (YYYY-MM-DD): ");
-                        printList(service.filterByDate(LocalDate.parse(scanner.nextLine())));
+                        LocalDate dataFiltro = LocalDate.parse(scanner.nextLine());
+                        printList(service.filterByDate(dataFiltro));
                     }
                     break;
                 case 4:

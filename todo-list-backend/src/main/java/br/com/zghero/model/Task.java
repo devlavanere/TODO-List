@@ -1,19 +1,19 @@
 package br.com.zghero.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Task {
     private String id;
     private String nome;
     private String descricao;
-    private LocalDate dataTermino;
+    private LocalDateTime dataTermino;
     private int prioridade;
     private String categoria;
     private Status status;
 
     // Construtor para nova tarefa
-    public Task(String nome, String descricao, LocalDate dataTermino, int prioridade, String categoria, Status status) {
+    public Task(String nome, String descricao, LocalDateTime dataTermino, int prioridade, String categoria, Status status) {
         this.id = UUID.randomUUID().toString().substring(0,6);
         this.nome = nome;
         this.descricao = descricao;
@@ -24,7 +24,7 @@ public class Task {
     }
 
     // Construtor para carregar do arquivo
-    public Task(String id, String nome, String descricao, LocalDate dataTermino, int prioridade, String categoria, Status status) {
+    public Task(String id, String nome, String descricao, LocalDateTime dataTermino, int prioridade, String categoria, Status status) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -35,34 +35,42 @@ public class Task {
     }
 
     public String getId() {
+
         return id;
     }
 
     public String getNome() {
+
         return nome;
     }
 
     public String getDescricao() {
+
         return descricao;
     }
 
-    public LocalDate getDataTermino() {
+    public LocalDateTime getDataTermino() {
+
         return dataTermino;
     }
 
     public int getPrioridade() {
+
         return prioridade;
     }
 
     public String getCategoria() {
+
         return categoria;
     }
 
     public Status getStatus() {
+
         return status;
     }
 
     public void setStatus(Status status) {
+
         this.status = status;
     }
 

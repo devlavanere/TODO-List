@@ -5,6 +5,7 @@ import br.com.zghero.model.Task;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -97,7 +98,7 @@ public class TaskService {
     public List<Task> filterByDate(LocalDate dataTermino) {
         List<Task> listaFiltrada = new ArrayList<>();
         for(Task t : tasks) {
-            if(t.getDataTermino() == dataTermino) {
+            if(t.getDataTermino().toLocalDate().equals(dataTermino)) {
                 listaFiltrada.add(t);
             }
         }
@@ -144,7 +145,7 @@ public class TaskService {
             while ((line = reader.readLine()) != null) {
                 String[] d = line.split(";");
                 if (d.length == 7) {
-                    tasks.add(new Task(d[0], d[1], d[2], LocalDate.parse(d[3]), Integer.parseInt(d[4]), d[5], Status.valueOf(d[6])));
+                    tasks.add(new Task(d[0], d[1], d[2], LocalDateTime.parse(d[3]), Integer.parseInt(d[4]), d[5], Status.valueOf(d[6])));
                 }
             }
         } catch (Exception e) {
