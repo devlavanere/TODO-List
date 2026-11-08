@@ -124,6 +124,39 @@ public class TaskService {
         System.out.println("=== ESTATÍSTICAS: TODO (" + contTodo + ") | DOING (" + contDoing + ") | DONE (" + contDone + ") ===");
     }
 
+    // --- NOVO MÉTODO PARA CHECAR ALARMES ---
+    public void checkAndPrintAlarms() {
+        LocalDateTime agora = LocalDateTime.now();
+        boolean precisaSalvar = false;
+
+        for (Task t : tasks) {
+            // Se a tarefa já está DONE, ignora os alarmes dela
+            if (t.getStatus() == Status.DONE) {
+                continue;
+            }
+
+            // Verifica cada alarme da tarefa
+            for (br.com.zghero.model.Alarme a : t.getAlarmes()) {
+                // Se a data/hora atual for maior ou igual ao momento do disparo E ele ainda NÃO foi notificado
+                if (!a.isNotificado() && (agora.isAfter(a.getMomentoDisparo()) || agora.isEqual(a.getMomentoDisparo()))) {
+                    System.out.println("************************************************************");
+                    System.out.println("  [ALARME] ATENÇÃO: A tarefa '" + t.getNome() + "' está próxima!");
+                    System.out.println("  Horário Limite: " + t.getDataTermino().toLocalTime());
+                    System.out.println("  Lembrete configurado para " + a.getMinutosAntecedencia() + " minutos de antecedência.");
+                    System.out.println("************************************************************\n");
+
+                    // Marca como notificado para não apitar novamente
+                    a.setNotificado(true);
+                    precisaSalvar = true;
+                }
+            }
+        }
+
+        if (precisaSalvar) {
+            saveToFile();
+        }
+    }
+
     // Salvar no arquivo
     public void saveToFile() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))) {

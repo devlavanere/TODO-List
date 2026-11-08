@@ -20,6 +20,9 @@ public class Main {
         TaskService service = new TaskService();
 
         while(true) {
+
+            service.checkAndPrintAlarms();
+
             System.out.println("\n------------------------------------------------");
             service.printDashBoard();
             System.out.println("------------------------------------------------");
