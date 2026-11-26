@@ -1,5 +1,15 @@
 const STORAGE_KEY = 'zg_todo_tasks';
 
+// Expressões Regulares para validação dos campos (Desafio K1-T8)
+const REGEX_RULES = {
+    nome: /^[A-Za-zÀ-ÿ0-9\s\-_.,!?()]{3,60}$/,
+    descricao: /^.{5,200}$/,
+    dataTermino: /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/,
+    prioridade: /^[1-5]$/,
+    categoria: /^[A-Za-zÀ-ÿ0-9\s\-_]{2,30}$/,
+    status: /^(TODO|DOING|DONE)$/
+};
+
 // Estado da aplicação
 let tasks = [];
 let currentFilter = 'ALL';
@@ -36,16 +46,149 @@ function saveTasks() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
-// REQUISITO - C e U: Receber dados de todos os parâmetros e salvar (Criar ou Editar)
+// Helpers de exibição de erro por campo
+function setFieldError(inputId, errorId, message) {
+    const input = document.getElementById(inputId);
+    const errorEl = document.getElementById(errorId);
+
+    if (message) {
+        input.classList.add('input-error');
+        errorEl.textContent = message;
+    } else {
+        input.classList.remove('input-error');
+        errorEl.textContent = '';
+    }
+}
+
+function clearAllErrors() {
+    setFieldError('nome', 'error-nome', '');
+    setFieldError('descricao', 'error-descricao', '');
+    setFieldError('data', 'error-data', '');
+    setFieldError('prioridade', 'error-prioridade', '');
+    setFieldError('categoria', 'error-categoria', '');
+    setFieldError('status', 'error-status', '');
+}
+
+// REQUISITO K1-T8: Validação da data de término com Regex + comparação com data atual
+function validateDueDate(dateStr) {
+    if (!dateStr) {
+        return 'A data de término é obrigatória.';
+    }
+
+    if (!REGEX_RULES.dataTermino.test(dateStr)) {
+        return 'Data inválida. Utilize o formato AAAA-MM-DD.';
+    }
+
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const parsedDate = new Date(year, month - 1, day);
+
+    // Verifica se a data existe no calendário (ex.: rejeita 2026-02-30)
+    const isRealCalendarDate =
+        parsedDate.getFullYear() === year &&
+        parsedDate.getMonth() === month - 1 &&
+        parsedDate.getDate() === day;
+
+    if (!isRealCalendarDate) {
+        return 'Data inexistente no calendário.';
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (parsedDate < today) {
+        return 'A data de término não pode ser menor que a data atual.';
+    }
+
+    return '';
+}
+
+// REQUISITO K1-T8: Validação completa do formulário com Regex
+function validateForm() {
+    let isValid = true;
+
+    const nome = document.getElementById('nome').value.trim();
+    const descricao = document.getElementById('descricao').value.trim();
+    const dataTermino = document.getElementById('data').value.trim();
+    const prioridade = document.getElementById('prioridade').value.trim();
+    const categoria = document.getElementById('categoria').value.trim();
+    const status = document.getElementById('status').value;
+
+    // 1. Nome
+    if (!REGEX_RULES.nome.test(nome)) {
+        setFieldError('nome', 'error-nome', 'Nome inválido (3 a 60 caracteres alfanuméricos).');
+        isValid = false;
+    } else {
+        setFieldError('nome', 'error-nome', '');
+    }
+
+    // 2. Descrição
+    if (!REGEX_RULES.descricao.test(descricao)) {
+        setFieldError('descricao', 'error-descricao', 'Descrição inválida (deve ter entre 5 e 200 caracteres).');
+        isValid = false;
+    } else {
+        setFieldError('descricao', 'error-descricao', '');
+    }
+
+    // 3. Data de término (Regex + não menor que atual)
+    const dateError = validateDueDate(dataTermino);
+    if (dateError) {
+        setFieldError('data', 'error-data', dateError);
+        isValid = false;
+    } else {
+        setFieldError('data', 'error-data', '');
+    }
+
+    // 4. Nível de prioridade (Regex 1 a 5)
+    if (!REGEX_RULES.prioridade.test(prioridade)) {
+        setFieldError('prioridade', 'error-prioridade', 'Nível de prioridade inválido. Informe um número de 1 a 5.');
+        isValid = false;
+    } else {
+        setFieldError('prioridade', 'error-prioridade', '');
+    }
+
+    // 5. Categoria
+    if (!REGEX_RULES.categoria.test(categoria)) {
+        setFieldError('categoria', 'error-categoria', 'Categoria inválida (2 a 30 letras ou números).');
+        isValid = false;
+    } else {
+        setFieldError('categoria', 'error-categoria', '');
+    }
+
+    // 6. Status
+    if (!REGEX_RULES.status.test(status)) {
+        setFieldError('status', 'error-status', 'Status inválido (TODO, DOING ou DONE).');
+        isValid = false;
+    } else {
+        setFieldError('status', 'error-status', '');
+    }
+
+    return isValid;
+}
+
+// Limpa o erro visual assim que o usuário corrige o campo
+['nome', 'descricao', 'data', 'prioridade', 'categoria', 'status'].forEach(fieldId => {
+    const el = document.getElementById(fieldId);
+    el.addEventListener('input', () => {
+        if (el.classList.contains('input-error')) {
+            validateForm();
+        }
+    });
+});
+
+// REQUISITO - C e U: Validar com Regex, encapsular e persistir (Criar ou Editar)
 form.addEventListener('submit', function (e) {
     e.preventDefault();
+
+    if (!validateForm()) {
+        return;
+    }
 
     const idInput = document.getElementById('task-id').value;
     const taskData = {
         nome: document.getElementById('nome').value.trim(),
         descricao: document.getElementById('descricao').value.trim(),
-        dataTermino: document.getElementById('data').value,
-        prioridade: parseInt(document.getElementById('prioridade').value, 10),
+        dataTermino: document.getElementById('data').value.trim(),
+        prioridade: parseInt(document.getElementById('prioridade').value.trim(), 10),
         categoria: document.getElementById('categoria').value.trim(),
         status: document.getElementById('status').value
     };
@@ -59,7 +202,7 @@ form.addEventListener('submit', function (e) {
     } else {
         taskData.id = generateId();
         tasks.push(taskData);
-        form.reset();
+        resetForm();
     }
 
     saveTasks();
@@ -70,6 +213,7 @@ btnCancel.addEventListener('click', resetForm);
 
 function resetForm() {
     form.reset();
+    clearAllErrors();
     document.getElementById('task-id').value = '';
     formTitle.textContent = 'Nova Tarefa';
     btnCancel.style.display = 'none';
@@ -81,6 +225,7 @@ function editTask(id) {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
+    clearAllErrors();
     document.getElementById('task-id').value = task.id;
     document.getElementById('nome').value = task.nome;
     document.getElementById('descricao').value = task.descricao;
@@ -133,7 +278,6 @@ btnBulkExecute.addEventListener('click', () => {
 
     const targetStatus = bulkStatusSelect.value;
 
-    // Busca as tarefas persistidas no localStorage e atualiza o status das selecionadas
     const storedTasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     tasks = storedTasks.map(task =>
         selectedTaskIds.has(task.id)
