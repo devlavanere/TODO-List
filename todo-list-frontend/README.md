@@ -23,6 +23,11 @@ Aplicação web de gerenciamento de tarefas desenvolvida durante a trilha **Acel
 - Contadores em tempo real no cabeçalho exibindo o total de tarefas em `TODO`, `DOING` e `DONE`.
 - Filtros rápidos para visualizar **Todas** as tarefas ou filtrar por status específico.
 
+### 5. Validação de Dados com Regex (Desafio K1-T8)
+- **Nível de Prioridade (`/^[1-5]$/`):** Garante que apenas números inteiros de `1` a `5` sejam aceitos.
+- **Data de Término (`/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/`):** Valida o padrão `AAAA-MM-DD`, verifica se a data existe no calendário e bloqueia datas anteriores ao dia atual.
+- **Campos Textuais e Status:** Valida tamanho mínimo/máximo e padrão de caracteres para **Nome**, **Descrição**, **Categoria** e **Status** (`TODO`, `DOING`, `DONE`), exibindo mensagens de erro abaixo de cada campo inválido.
+
 ---
 
 ## Estrutura de Arquivos
